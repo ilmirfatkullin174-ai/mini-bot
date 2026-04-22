@@ -246,8 +246,11 @@
     ];
 
     // ========== НАСТРОЙКА ДЛЯ MAX ==========
-    // 👇 СЮДА ВСТАВЬТЕ ВАШ URL ВЕБХУКА ДЛЯ КАНАЛА "Лиды-Шинторг"
-    const MAX_WEBHOOK_URL = 'https://ваш-макс.ру/hooks/ваш-ключ';
+    // 👇 ВАШ ТОКЕН УЖЕ ВСТАВЛЕН
+    const MAX_API_TOKEN = 'f9LHodD0cOIgNLtuT6qWMj62c7JxClB_fT54qvhqo5zaVVhpDQh2o2G-mfIdYfy_WsTarrg2MUwwOEmhoHmY';
+    
+    // 👇 ID КАНАЛА "Лиды-Шинторг"
+    const MAX_CHANNEL_ID = '-73840153820539';
     // ========================================
 
     let currentStepIndex = 0;
@@ -451,30 +454,38 @@
         messageText += `\n🕒 Отправлено с мини-приложения`;
         
         let success = false;
-        if (MAX_WEBHOOK_URL && MAX_WEBHOOK_URL !== 'https://ваш-макс.ру/hooks/ваш-ключ') {
+        if (MAX_API_TOKEN && MAX_API_TOKEN !== 'ваш_личный_токен_доступа' && MAX_CHANNEL_ID) {
             try {
-                const resp = await fetch(MAX_WEBHOOK_URL, {
+                const url = 'https://platform-api.max.ru/messages';
+                const resp = await fetch(url, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: messageText })
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': MAX_API_TOKEN
+                    },
+                    body: JSON.stringify({
+                        chat_id: MAX_CHANNEL_ID,
+                        text: messageText,
+                        format: 'markdown'
+                    })
                 });
                 if (resp.ok) {
                     success = true;
                 } else {
-                    console.warn('MAX webhook error', await resp.text());
+                    console.warn('MAX API error', await resp.text());
                 }
             } catch(e) { 
                 console.error('Ошибка отправки в MAX:', e);
             }
         } else {
-            console.warn('Webhook URL не настроен. Заявка в логе:');
+            console.warn('Токен или ID канала не настроены. Заявка в логе:');
             console.log(messageText);
             success = true;
         }
         
         const successHtml = `
             <div class="success-box">
-                ✅ Заявка отправлена!<br>
+                ✅ ${success ? 'Заявка отправлена!' : 'Заявка получена!'}<br>
                 <strong style="display:block; margin-top:12px;">Мы свяжемся с вами в ближайшее время</strong>
             </div>
             <button class="reset-btn" id="internalReset">➕ Новая заявка</button>
@@ -505,9 +516,6 @@
     resetBtn.addEventListener('click', resetForm);
     goToStep(0);
 </script>
-
-<!-- JivoSite код для онлайн-чата -->
-<script src="//code.jivo.ru/widget/HxyaJ2txun" async></script>
 
 </body>
 </html>
