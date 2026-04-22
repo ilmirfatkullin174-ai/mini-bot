@@ -26,7 +26,6 @@
             border-radius: 48px;
             padding: 32px 24px 40px;
             box-shadow: 0 25px 45px rgba(0,0,0,0.25);
-            transition: all 0.3s ease;
         }
         .progress {
             background: #e9ecef;
@@ -40,20 +39,17 @@
             width: 0%;
             height: 100%;
             transition: width 0.3s;
-            border-radius: 30px;
         }
         .step-indicator {
             font-size: 13px;
             color: #ff8c00;
             font-weight: 600;
             margin-bottom: 8px;
-            letter-spacing: 1px;
         }
         h2 {
             font-size: 1.7rem;
             margin-bottom: 24px;
             color: #1e2a3a;
-            line-height: 1.3;
         }
         .options {
             display: flex;
@@ -68,17 +64,9 @@
             border-radius: 60px;
             font-size: 1.05rem;
             text-align: left;
-            display: flex;
-            align-items: center;
-            gap: 12px;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: 0.2s;
             font-weight: 500;
-            color: #1e2a3a;
-        }
-        .option-btn:hover {
-            background: #e9ecef;
-            transform: scale(0.98);
         }
         .option-btn.selected {
             background: #ff8c00;
@@ -92,12 +80,9 @@
             border-radius: 60px;
             outline: none;
             margin-bottom: 28px;
-            transition: 0.2s;
-            font-family: inherit;
         }
         .input-field:focus {
             border-color: #ff8c00;
-            box-shadow: 0 0 0 3px rgba(255,140,0,0.2);
         }
         .btn-next {
             background: #1e2a3a;
@@ -109,14 +94,9 @@
             font-weight: bold;
             border-radius: 60px;
             cursor: pointer;
-            transition: 0.2s;
         }
         .btn-next:hover {
             background: #ff8c00;
-        }
-        .btn-next:disabled {
-            background: #adb5bd;
-            cursor: not-allowed;
         }
         .success-box {
             background: #d1fae5;
@@ -129,7 +109,6 @@
         .error-msg {
             color: #dc2626;
             font-size: 14px;
-            margin-top: -20px;
             margin-bottom: 16px;
         }
         .reset-btn {
@@ -141,7 +120,6 @@
             margin-top: 20px;
             width: 100%;
             cursor: pointer;
-            font-size: 14px;
         }
         .footer-note {
             font-size: 11px;
@@ -163,9 +141,7 @@
             font-size: 1rem;
             font-weight: 500;
             cursor: pointer;
-            transition: 0.2s;
             flex: 1 0 auto;
-            min-width: 70px;
         }
         .quantity-btn.selected {
             background: #ff8c00;
@@ -177,11 +153,7 @@
             font-size: 1rem;
             border: 2px solid #e2e8f0;
             border-radius: 50px;
-            outline: none;
             text-align: center;
-        }
-        .quantity-input:focus {
-            border-color: #ff8c00;
         }
     </style>
 </head>
@@ -190,72 +162,29 @@
     <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
     <div class="step-indicator" id="stepLabel">Вопрос 1 из 7</div>
     <h2 id="questionText">Загрузка...</h2>
-    
     <div id="dynamicContent"></div>
-    
     <button class="reset-btn" id="resetBtn" style="display: none;">↻ Начать заново</button>
     <div class="footer-note" id="footerNote">Ответьте на вопросы — мы подберём шины</div>
 </div>
 
 <script>
-    // ----- ЭТАПЫ ОПРОСНИКА -----
-    const steps = [
-        { 
-            id: 'type', 
-            question: '🚛 Какой тип шин вас интересует?', 
-            type: 'choice',
-            options: ['🚗 Легковая', '🚛 Грузовая', '🏗️ Спецшина']
-        },
-        { 
-            id: 'season', 
-            question: '❄️ Какой сезон для легковых шин?', 
-            type: 'choice',
-            options: ['☀️ Лето', '❄️ Зима', '🍂 Всесезон'],
-            condition: (answers) => answers.type === '🚗 Легковая'
-        },
-        { 
-            id: 'size', 
-            question: '📏 Напишите размер шины (пример: 205/55 R16 или 12.00 R20)', 
-            type: 'text',
-            placeholder: 'Например: 205/55 R16'
-        },
-        { 
-            id: 'brand', 
-            question: '🏷️ Какой бренд предпочитаете? (можно написать "любой")', 
-            type: 'text',
-            placeholder: 'Nokian, Michelin, Cordiant...'
-        },
-        { 
-            id: 'quantity', 
-            question: '🔢 Сколько шин вам нужно?', 
-            type: 'quantity',
-            options: ['2 шт', '4 шт', '6 шт', '8 шт', 'Другое']
-        },
-        { 
-            id: 'city', 
-            question: '📍 Ваш город (для доставки или самовывоза)', 
-            type: 'text',
-            placeholder: 'Например: Москва, Казань, Владивосток'
-        },
-        { 
-            id: 'phone', 
-            question: '📞 Ваш номер телефона для связи', 
-            type: 'tel',
-            placeholder: '+7 900 123-45-67'
-        }
-    ];
+    // ========== НАСТРОЙКА ОТПРАВКИ НА ПОЧТУ ==========
+    // 👇 ВАША ПОЧТА УЖЕ ВСТАВЛЕНА
+    const YOUR_EMAIL = 'info@shintorg86.ru';
+    // =================================================
 
-    // ========== НАСТРОЙКА ДЛЯ MAX ==========
-    // 👇 ВАШ НОВЫЙ ТОКЕН УЖЕ ВСТАВЛЕН
-    const MAX_API_TOKEN = 'f9LHodD0cOJ9HH6B31_hZ4d59_IA2ExLXHYQYGcnzM6AlxfVhPUdrEP9mOnWNENYtQMflwz9V0lDCzH5M9w9';
-    
-    // 👇 ID КАНАЛА "Лиды-Шинторг"
-    const MAX_CHANNEL_ID = '-73840153820539';
-    // ========================================
+    const steps = [
+        { id: 'type', question: '🚛 Какой тип шин вас интересует?', type: 'choice', options: ['🚗 Легковая', '🚛 Грузовая', '🏗️ Спецшина'] },
+        { id: 'season', question: '❄️ Какой сезон для легковых шин?', type: 'choice', options: ['☀️ Лето', '❄️ Зима', '🍂 Всесезон'], condition: (a) => a.type === '🚗 Легковая' },
+        { id: 'size', question: '📏 Напишите размер шины', type: 'text', placeholder: '205/55 R16' },
+        { id: 'brand', question: '🏷️ Бренд', type: 'text', placeholder: 'Nokian, Michelin...' },
+        { id: 'quantity', question: '🔢 Сколько шин нужно?', type: 'quantity', options: ['2 шт', '4 шт', '6 шт', '8 шт', 'Другое'] },
+        { id: 'city', question: '📍 Ваш город', type: 'text', placeholder: 'Москва, Казань...' },
+        { id: 'phone', question: '📞 Ваш телефон', type: 'tel', placeholder: '+7 900 123-45-67' }
+    ];
 
     let currentStepIndex = 0;
     let answers = {};
-    let submitted = false;
 
     const questionTextEl = document.getElementById('questionText');
     const dynamicContent = document.getElementById('dynamicContent');
@@ -265,19 +194,13 @@
     const footerNote = document.getElementById('footerNote');
 
     function getVisibleSteps() {
-        return steps.filter(step => {
-            if (step.condition) {
-                return step.condition(answers);
-            }
-            return true;
-        });
+        return steps.filter(step => !step.condition || step.condition(answers));
     }
 
     function updateProgress() {
         const visible = getVisibleSteps();
         const answeredCount = visible.filter(step => answers[step.id] !== undefined).length;
-        const percent = (answeredCount / visible.length) * 100;
-        progressFill.style.width = percent + '%';
+        progressFill.style.width = (answeredCount / visible.length) * 100 + '%';
     }
 
     function goToStep(stepIndex) {
@@ -286,236 +209,148 @@
             submitOrder();
             return;
         }
-        
         const step = visible[stepIndex];
         currentStepIndex = stepIndex;
-        
         stepLabel.innerText = `Вопрос ${stepIndex+1} из ${visible.length}`;
         questionTextEl.innerHTML = step.question;
-        
+
         if (step.type === 'choice') {
-            let optionsHtml = '<div class="options">';
+            let html = '<div class="options">';
             step.options.forEach(opt => {
-                const isSelected = (answers[step.id] === opt);
-                const selectedClass = isSelected ? 'selected' : '';
-                optionsHtml += `<button class="option-btn ${selectedClass}" data-value="${opt.replace(/[^а-яёa-z0-9]/gi, '')}">${opt}</button>`;
+                const selected = answers[step.id] === opt ? 'selected' : '';
+                html += `<button class="option-btn ${selected}">${opt}</button>`;
             });
-            optionsHtml += '</div><button class="btn-next" id="nextBtn">Далее →</button>';
-            dynamicContent.innerHTML = optionsHtml;
-            
-            const btns = document.querySelectorAll('.option-btn');
-            btns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    btns.forEach(b => b.classList.remove('selected'));
+            html += '</div><button class="btn-next" id="nextBtn">Далее →</button>';
+            dynamicContent.innerHTML = html;
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.onclick = () => {
+                    document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
                     btn.classList.add('selected');
                     answers[step.id] = btn.innerText;
                     updateProgress();
                     goToStep(currentStepIndex + 1);
-                });
+                };
             });
         }
         else if (step.type === 'quantity') {
-            let quantityHtml = '<div class="quantity-buttons">';
+            let html = '<div class="quantity-buttons">';
             step.options.forEach(opt => {
-                const isSelected = (answers[step.id] === opt);
-                const selectedClass = isSelected ? 'selected' : '';
-                quantityHtml += `<button class="quantity-btn ${selectedClass}" data-value="${opt}">${opt}</button>`;
+                const selected = answers[step.id] === opt ? 'selected' : '';
+                html += `<button class="quantity-btn ${selected}">${opt}</button>`;
             });
-            quantityHtml += '</div><div id="customQuantityBlock" style="display: none;"><input type="number" id="customQuantity" class="quantity-input" placeholder="Введите количество" min="1" max="100"></div>';
-            quantityHtml += '<button class="btn-next" id="nextBtn">Далее →</button>';
-            dynamicContent.innerHTML = quantityHtml;
-            
+            html += '</div><div id="customBlock" style="display:none"><input type="number" id="customQty" class="quantity-input" placeholder="Введите количество"></div>';
+            html += '<button class="btn-next" id="nextBtn">Далее →</button>';
+            dynamicContent.innerHTML = html;
             const btns = document.querySelectorAll('.quantity-btn');
-            const customBlock = document.getElementById('customQuantityBlock');
-            const nextBtn = document.getElementById('nextBtn');
-            
+            const customBlock = document.getElementById('customBlock');
             btns.forEach(btn => {
-                btn.addEventListener('click', () => {
+                btn.onclick = () => {
                     btns.forEach(b => b.classList.remove('selected'));
                     btn.classList.add('selected');
-                    
                     if (btn.innerText === 'Другое') {
                         customBlock.style.display = 'block';
-                        const customInput = document.getElementById('customQuantity');
-                        if (customInput) {
-                            customInput.value = '';
-                            customInput.focus();
-                        }
                         answers[step.id] = null;
                     } else {
                         customBlock.style.display = 'none';
                         answers[step.id] = btn.innerText;
                     }
-                });
+                };
             });
-            
-            const handleNext = () => {
-                const selectedBtn = document.querySelector('.quantity-btn.selected');
-                if (!selectedBtn) {
-                    showError('Выберите количество шин');
-                    return;
-                }
-                
-                if (selectedBtn.innerText === 'Другое') {
-                    const customVal = document.getElementById('customQuantity')?.value;
-                    if (!customVal || customVal < 1) {
-                        showError('Введите количество шин (от 1 до 100)');
-                        return;
-                    }
-                    answers[step.id] = customVal + ' шт';
-                } else if (!answers[step.id]) {
-                    showError('Выберите количество шин');
-                    return;
+            document.getElementById('nextBtn').onclick = () => {
+                const selected = document.querySelector('.quantity-btn.selected');
+                if (!selected) { showError('Выберите количество'); return; }
+                if (selected.innerText === 'Другое') {
+                    const val = document.getElementById('customQty')?.value;
+                    if (!val || val < 1) { showError('Введите количество'); return; }
+                    answers[step.id] = val + ' шт';
                 }
                 updateProgress();
                 goToStep(currentStepIndex + 1);
             };
-            
-            nextBtn.addEventListener('click', handleNext);
         }
         else if (step.type === 'text' || step.type === 'tel') {
-            const inputType = step.type === 'tel' ? 'tel' : 'text';
-            const currentValue = answers[step.id] || '';
-            dynamicContent.innerHTML = `
-                <input type="${inputType}" class="input-field" id="textInput" placeholder="${step.placeholder || ''}" value="${currentValue.replace(/"/g, '&quot;')}">
-                <button class="btn-next" id="nextBtn">Далее →</button>
-            `;
+            const current = answers[step.id] || '';
+            dynamicContent.innerHTML = `<input type="${step.type}" id="textInput" class="input-field" placeholder="${step.placeholder || ''}" value="${current}"><button class="btn-next" id="nextBtn">Далее →</button>`;
             const input = document.getElementById('textInput');
-            const nextBtn = document.getElementById('nextBtn');
-            
-            const handleNext = () => {
+            document.getElementById('nextBtn').onclick = () => {
                 let val = input.value.trim();
-                if (step.id === 'phone') {
-                    if (val.length < 5) {
-                        showError('Введите корректный номер телефона');
-                        return;
-                    }
-                } else if (step.id === 'size') {
-                    if (val.length < 3) {
-                        showError('Укажите размер шины (например, 205/55 R16)');
-                        return;
-                    }
-                } else if (step.id === 'brand') {
-                    if (val.length < 1) {
-                        showError('Введите бренд или "любой"');
-                        return;
-                    }
-                } else if (step.id === 'city') {
-                    if (val.length < 2) {
-                        showError('Укажите ваш город');
-                        return;
-                    }
-                }
+                if (step.id === 'phone' && val.length < 5) { showError('Введите телефон'); return; }
+                if (step.id === 'size' && val.length < 3) { showError('Введите размер'); return; }
+                if (step.id === 'city' && val.length < 2) { showError('Введите город'); return; }
                 answers[step.id] = val;
                 updateProgress();
                 goToStep(currentStepIndex + 1);
             };
-            
-            nextBtn.addEventListener('click', handleNext);
-            input.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleNext(); });
             input.focus();
         }
-        
-        updateProgress();
-        resetBtn.style.display = Object.keys(answers).length > 0 ? 'block' : 'none';
-        footerNote.innerText = (step.type === 'choice' || step.type === 'quantity') ? 'Нажмите на вариант ответа' : 'Введите ответ и нажмите "Далее"';
+        resetBtn.style.display = Object.keys(answers).length ? 'block' : 'none';
     }
-    
+
     function showError(msg) {
-        let errDiv = document.querySelector('.error-msg');
-        if (!errDiv) {
-            errDiv = document.createElement('div');
-            errDiv.className = 'error-msg';
-            dynamicContent.appendChild(errDiv);
+        let err = document.querySelector('.error-msg');
+        if (!err) {
+            err = document.createElement('div');
+            err.className = 'error-msg';
+            dynamicContent.appendChild(err);
         }
-        errDiv.innerText = msg;
-        setTimeout(() => { if(errDiv) errDiv.innerText = ''; }, 2000);
+        err.innerText = msg;
+        setTimeout(() => err.innerText = '', 2000);
     }
-    
+
     async function submitOrder() {
         const visible = getVisibleSteps();
         for (let step of visible) {
-            if (!answers[step.id]) {
-                goToStep(visible.findIndex(s => s.id === step.id));
-                return;
-            }
+            if (!answers[step.id]) { goToStep(visible.findIndex(s => s.id === step.id)); return; }
         }
-        
-        let messageText = `🔔 НОВАЯ ЗАЯВКА НА ШИНЫ 🔔\n\n`;
-        messageText += `🚛 Тип: ${answers.type}\n`;
-        if (answers.type === '🚗 Легковая' && answers.season) {
-            messageText += `❄️ Сезон: ${answers.season}\n`;
-        }
-        messageText += `📏 Размер: ${answers.size}\n`;
-        messageText += `🏷️ Бренд: ${answers.brand}\n`;
-        messageText += `🔢 Количество: ${answers.quantity}\n`;
-        messageText += `📍 Город: ${answers.city}\n`;
-        messageText += `📞 Телефон: ${answers.phone}\n`;
-        messageText += `\n🕒 Отправлено с мини-приложения`;
-        
-        let success = false;
-        if (MAX_API_TOKEN && MAX_API_TOKEN !== 'ваш_личный_токен_доступа' && MAX_CHANNEL_ID) {
+
+        let text = `🔔 НОВАЯ ЗАЯВКА НА ШИНЫ 🔔\n\n`;
+        text += `Тип: ${answers.type}\n`;
+        if (answers.season) text += `Сезон: ${answers.season}\n`;
+        text += `Размер: ${answers.size}\n`;
+        text += `Бренд: ${answers.brand}\n`;
+        text += `Количество: ${answers.quantity}\n`;
+        text += `Город: ${answers.city}\n`;
+        text += `Телефон: ${answers.phone}\n`;
+
+        let sent = false;
+        if (YOUR_EMAIL && YOUR_EMAIL !== 'ваша@почта.ru') {
             try {
-                const url = 'https://platform-api.max.ru/messages';
-                const resp = await fetch(url, {
+                const formData = new FormData();
+                formData.append('email', YOUR_EMAIL);
+                formData.append('subject', 'Новая заявка на шины');
+                formData.append('message', text);
+                const resp = await fetch('https://formsubmit.co/ajax/' + YOUR_EMAIL, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': MAX_API_TOKEN
-                    },
-                    body: JSON.stringify({
-                        chat_id: MAX_CHANNEL_ID,
-                        text: messageText,
-                        format: 'markdown'
-                    })
+                    body: formData
                 });
-                if (resp.ok) {
-                    success = true;
-                } else {
-                    console.warn('MAX API error', await resp.text());
-                }
-            } catch(e) { 
-                console.error('Ошибка отправки в MAX:', e);
-            }
-        } else {
-            console.warn('Токен или ID канала не настроены. Заявка в логе:');
-            console.log(messageText);
-            success = true;
+                if (resp.ok) sent = true;
+            } catch(e) { console.error(e); }
         }
-        
-        const successHtml = `
+
+        dynamicContent.innerHTML = `
             <div class="success-box">
-                ✅ ${success ? 'Заявка отправлена!' : 'Заявка получена!'}<br>
-                <strong style="display:block; margin-top:12px;">Мы свяжемся с вами в ближайшее время</strong>
+                ✅ ${sent ? 'Заявка отправлена!' : 'Заявка сохранена!'}<br>
+                <strong>Мы свяжемся с вами</strong>
             </div>
             <button class="reset-btn" id="internalReset">➕ Новая заявка</button>
         `;
-        dynamicContent.innerHTML = successHtml;
-        questionTextEl.innerHTML = '✨ Спасибо за заявку!';
+        questionTextEl.innerHTML = '✨ Спасибо!';
         stepLabel.innerText = 'Готово';
         progressFill.style.width = '100%';
-        footerNote.innerText = 'Менеджер свяжется с вами';
-        
-        const resetNew = document.getElementById('internalReset');
-        if (resetNew) resetNew.addEventListener('click', () => resetForm());
+        document.getElementById('internalReset')?.addEventListener('click', resetForm);
         resetBtn.style.display = 'block';
         resetBtn.innerText = '➕ Новая заявка';
-        submitted = true;
     }
-    
+
     function resetForm() {
         answers = {};
         currentStepIndex = 0;
-        submitted = false;
-        resetBtn.innerText = '↻ Начать заново';
-        resetBtn.style.display = 'block';
-        footerNote.innerText = 'Ответьте на вопросы — мы подберём шины';
         goToStep(0);
+        resetBtn.innerText = '↻ Начать заново';
     }
-    
+
     resetBtn.addEventListener('click', resetForm);
     goToStep(0);
 </script>
-
 </body>
 </html>
