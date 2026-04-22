@@ -246,7 +246,7 @@
     ];
 
     // ========== НАСТРОЙКА ДЛЯ MAX ==========
-    // 👇 СЮДА ВСТАВЬТЕ ВАШ URL ВЕБХУКА ИЗ MAX
+    // 👇 СЮДА ВСТАВЬТЕ ВАШ URL ВЕБХУКА ДЛЯ КАНАЛА "Лиды-Шинторг"
     const MAX_WEBHOOK_URL = 'https://ваш-макс.ру/hooks/ваш-ключ';
     // ========================================
 
@@ -438,7 +438,6 @@
             }
         }
         
-        // Формируем текст для MAX
         let messageText = `🔔 НОВАЯ ЗАЯВКА НА ШИНЫ 🔔\n\n`;
         messageText += `🚛 Тип: ${answers.type}\n`;
         if (answers.type === '🚗 Легковая' && answers.season) {
@@ -451,7 +450,6 @@
         messageText += `📞 Телефон: ${answers.phone}\n`;
         messageText += `\n🕒 Отправлено с мини-приложения`;
         
-        // Отправка в MAX через вебхук
         let success = false;
         if (MAX_WEBHOOK_URL && MAX_WEBHOOK_URL !== 'https://ваш-макс.ру/hooks/ваш-ключ') {
             try {
@@ -471,10 +469,9 @@
         } else {
             console.warn('Webhook URL не настроен. Заявка в логе:');
             console.log(messageText);
-            success = true; // для теста
+            success = true;
         }
         
-        // Показываем результат
         const successHtml = `
             <div class="success-box">
                 ✅ Заявка отправлена!<br>
@@ -508,5 +505,9 @@
     resetBtn.addEventListener('click', resetForm);
     goToStep(0);
 </script>
+
+<!-- JivoSite код для онлайн-чата -->
+<script src="//code.jivo.ru/widget/HxyaJ2txun" async></script>
+
 </body>
 </html>
