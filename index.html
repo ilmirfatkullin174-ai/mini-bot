@@ -67,6 +67,7 @@
             cursor: pointer;
             transition: 0.2s;
             font-weight: 500;
+            width: 100%;
         }
         .option-btn.selected {
             background: #ff8c00;
@@ -94,6 +95,7 @@
             font-weight: bold;
             border-radius: 60px;
             cursor: pointer;
+            transition: 0.2s;
         }
         .btn-next:hover {
             background: #ff8c00;
@@ -110,6 +112,7 @@
             color: #dc2626;
             font-size: 14px;
             margin-bottom: 16px;
+            text-align: center;
         }
         .reset-btn {
             background: none;
@@ -154,6 +157,18 @@
             border: 2px solid #e2e8f0;
             border-radius: 50px;
             text-align: center;
+        }
+        /* Дополнительные стили для мобильных устройств */
+        @media (max-width: 480px) {
+            .card {
+                padding: 24px 20px 32px;
+            }
+            h2 {
+                font-size: 1.4rem;
+            }
+            .option-btn, .quantity-btn, .btn-next {
+                padding: 14px 16px;
+            }
         }
     </style>
 </head>
@@ -227,14 +242,16 @@
             html += '</div><button class="btn-next" id="nextBtn">Далее →</button>';
             dynamicContent.innerHTML = html;
             
-            document.querySelectorAll('.option-btn').forEach(btn => {
-                btn.onclick = () => {
-                    document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
-                    btn.classList.add('selected');
-                    answers[step.id] = btn.innerText;
+            const btns = document.querySelectorAll('.option-btn');
+            btns.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    btns.forEach(b => b.classList.remove('selected'));
+                    this.classList.add('selected');
+                    answers[step.id] = this.innerText;
                     updateProgress();
                     goToStep(currentStepIndex + 1);
-                };
+                });
             });
         }
         else if (step.type === 'quantity') {
@@ -251,47 +268,56 @@
             const customBlock = document.getElementById('customBlock');
             
             btns.forEach(btn => {
-                btn.onclick = () => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
                     btns.forEach(b => b.classList.remove('selected'));
-                    btn.classList.add('selected');
-                    if (btn.innerText === 'Другое') {
+                    this.classList.add('selected');
+                    if (this.innerText === 'Другое') {
                         customBlock.style.display = 'block';
                         answers[step.id] = null;
                     } else {
                         customBlock.style.display = 'none';
-                        answers[step.id] = btn.innerText;
+                        answers[step.id] = this.innerText;
                     }
-                };
+                });
             });
             
-            document.getElementById('nextBtn').onclick = () => {
-                const selected = document.querySelector('.quantity-btn.selected');
-                if (!selected) { showError('Выберите количество'); return; }
-                if (selected.innerText === 'Другое') {
-                    const val = document.getElementById('customQty')?.value;
-                    if (!val || val < 1) { showError('Введите количество'); return; }
-                    answers[step.id] = val + ' шт';
-                }
-                updateProgress();
-                goToStep(currentStepIndex + 1);
-            };
+            const nextBtn = document.getElementById('nextBtn');
+            if (nextBtn) {
+                nextBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const selected = document.querySelector('.quantity-btn.selected');
+                    if (!selected) { showError('Выберите количество'); return; }
+                    if (selected.innerText === 'Другое') {
+                        const val = document.getElementById('customQty')?.value;
+                        if (!val || val < 1) { showError('Введите количество'); return; }
+                        answers[step.id] = val + ' шт';
+                    }
+                    updateProgress();
+                    goToStep(currentStepIndex + 1);
+                });
+            }
         }
         else if (step.type === 'text' || step.type === 'tel') {
             const current = answers[step.id] || '';
             dynamicContent.innerHTML = `<input type="${step.type}" id="textInput" class="input-field" placeholder="${step.placeholder || ''}" value="${current}"><button class="btn-next" id="nextBtn">Далее →</button>`;
             
             const input = document.getElementById('textInput');
-            document.getElementById('nextBtn').onclick = () => {
-                let val = input.value.trim();
-                if (step.id === 'phone' && val.length < 5) { showError('Введите телефон'); return; }
-                if (step.id === 'size' && val.length < 3) { showError('Введите размер'); return; }
-                if (step.id === 'city' && val.length < 2) { showError('Введите город'); return; }
-                if (step.id === 'brand' && val.length < 1) { showError('Введите бренд'); return; }
-                answers[step.id] = val;
-                updateProgress();
-                goToStep(currentStepIndex + 1);
-            };
-            input.focus();
+            const nextBtn = document.getElementById('nextBtn');
+            if (nextBtn) {
+                nextBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    let val = input.value.trim();
+                    if (step.id === 'phone' && val.length < 5) { showError('Введите телефон'); return; }
+                    if (step.id === 'size' && val.length < 3) { showError('Введите размер'); return; }
+                    if (step.id === 'city' && val.length < 2) { showError('Введите город'); return; }
+                    if (step.id === 'brand' && val.length < 1) { showError('Введите бренд'); return; }
+                    answers[step.id] = val;
+                    updateProgress();
+                    goToStep(currentStepIndex + 1);
+                });
+            }
+            if (input) input.focus();
         }
         resetBtn.style.display = Object.keys(answers).length ? 'block' : 'none';
     }
@@ -304,7 +330,9 @@
             dynamicContent.appendChild(err);
         }
         err.innerText = msg;
-        setTimeout(() => err.innerText = '', 2000);
+        setTimeout(() => {
+            if (err) err.innerText = '';
+        }, 2000);
     }
 
     async function submitOrder() {
@@ -346,7 +374,9 @@
         stepLabel.innerText = 'Готово';
         progressFill.style.width = '100%';
         footerNote.innerText = 'Менеджер свяжется с вами';
-        document.getElementById('internalReset')?.addEventListener('click', resetForm);
+        
+        const internalReset = document.getElementById('internalReset');
+        if (internalReset) internalReset.addEventListener('click', resetForm);
         resetBtn.style.display = 'block';
         resetBtn.innerText = '➕ Новая заявка';
     }
