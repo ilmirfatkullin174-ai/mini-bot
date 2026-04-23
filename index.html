@@ -169,7 +169,7 @@
 
 <script>
     // ========== НАСТРОЙКА ОТПРАВКИ НА ПОЧТУ ==========
-    // 👇 ВАША ПОЧТА УЖЕ ВСТАВЛЕНА
+    // 👇 ВАША ПОЧТА (уже вставлена)
     const YOUR_EMAIL = 'info@shintorg86.ru';
     // =================================================
 
@@ -303,7 +303,7 @@
             if (!answers[step.id]) { goToStep(visible.findIndex(s => s.id === step.id)); return; }
         }
 
-        let text = `🔔 НОВАЯ ЗАЯВКА НА ШИНЫ 🔔\n\n`;
+        let text = `НОВАЯ ЗАЯВКА НА ШИНЫ\n\n`;
         text += `Тип: ${answers.type}\n`;
         if (answers.season) text += `Сезон: ${answers.season}\n`;
         text += `Размер: ${answers.size}\n`;
@@ -312,20 +312,20 @@
         text += `Город: ${answers.city}\n`;
         text += `Телефон: ${answers.phone}\n`;
 
+        // Отправка через Formspree (бесплатно, 50 писем в месяц)
         let sent = false;
-        if (YOUR_EMAIL && YOUR_EMAIL !== 'ваша@почта.ru') {
-            try {
-                const formData = new FormData();
-                formData.append('email', YOUR_EMAIL);
-                formData.append('subject', 'Новая заявка на шины');
-                formData.append('message', text);
-                const resp = await fetch('https://formsubmit.co/ajax/' + YOUR_EMAIL, {
-                    method: 'POST',
-                    body: formData
-                });
-                if (resp.ok) sent = true;
-            } catch(e) { console.error(e); }
-        }
+        try {
+            const resp = await fetch('https://formspree.io/f/mkgwkjda', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: YOUR_EMAIL,
+                    subject: 'Новая заявка на шины',
+                    message: text
+                })
+            });
+            if (resp.ok) sent = true;
+        } catch(e) { console.error(e); }
 
         dynamicContent.innerHTML = `
             <div class="success-box">
