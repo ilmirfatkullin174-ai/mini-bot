@@ -5,18 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Подбор шин - опросник</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             background: linear-gradient(135deg, #0f2b3d 0%, #1a3a4f 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            font-family: system-ui, sans-serif;
             padding: 16px;
         }
         .card {
@@ -67,6 +63,7 @@
             cursor: pointer;
             transition: 0.2s;
             font-weight: 500;
+            width: 100%;
         }
         .option-btn.selected {
             background: #ff8c00;
@@ -94,9 +91,10 @@
             font-weight: bold;
             border-radius: 60px;
             cursor: pointer;
+            transition: 0.2s;
         }
-        .btn-next:hover {
-            background: #ff8c00;
+        .btn-next:active {
+            transform: scale(0.98);
         }
         .success-box {
             background: #d1fae5;
@@ -110,6 +108,7 @@
             color: #dc2626;
             font-size: 14px;
             margin-bottom: 16px;
+            text-align: center;
         }
         .reset-btn {
             background: none;
@@ -169,20 +168,17 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
-    // ========== ВАШИ ДАННЫЕ ИЗ EMAILJS (УЖЕ ВСТАВЛЕНЫ) ==========
     const EMAILJS_PUBLIC_KEY = 'tAKHA2aayPczXoZdt';
     const EMAILJS_SERVICE_ID = 'service_8cmb02c';
     const EMAILJS_TEMPLATE_ID = 'template_vy8p6wi';
-    // ===========================================================
 
-    // Инициализация EmailJS
     emailjs.init(EMAILJS_PUBLIC_KEY);
 
     const steps = [
         { id: 'type', question: '🚛 Какой тип шин вас интересует?', type: 'choice', options: ['🚗 Легковая', '🚛 Грузовая', '🏗️ Спецшина'] },
         { id: 'season', question: '❄️ Какой сезон для легковых шин?', type: 'choice', options: ['☀️ Лето', '❄️ Зима', '🍂 Всесезон'], condition: (a) => a.type === '🚗 Легковая' },
-        { id: 'size', question: '📏 Напишите размер шины (пример: 205/55 R16)', type: 'text', placeholder: '205/55 R16' },
-        { id: 'brand', question: '🏷️ Бренд (можно "любой")', type: 'text', placeholder: 'Nokian, Michelin...' },
+        { id: 'size', question: '📏 Напишите размер шины', type: 'text', placeholder: '205/55 R16' },
+        { id: 'brand', question: '🏷️ Бренд', type: 'text', placeholder: 'Nokian, Michelin...' },
         { id: 'quantity', question: '🔢 Сколько шин нужно?', type: 'quantity', options: ['2 шт', '4 шт', '6 шт', '8 шт', 'Другое'] },
         { id: 'city', question: '📍 Ваш город', type: 'text', placeholder: 'Москва, Казань...' },
         { id: 'phone', question: '📞 Ваш телефон', type: 'tel', placeholder: '+7 900 123-45-67' }
@@ -229,7 +225,8 @@
             dynamicContent.innerHTML = html;
             
             document.querySelectorAll('.option-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
                     document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
                     btn.classList.add('selected');
                     answers[step.id] = btn.innerText;
@@ -252,7 +249,8 @@
             const customBlock = document.getElementById('customBlock');
             
             btns.forEach(btn => {
-                btn.addEventListener('click', () => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
                     btns.forEach(b => b.classList.remove('selected'));
                     btn.classList.add('selected');
                     if (btn.innerText === 'Другое') {
@@ -265,7 +263,8 @@
                 });
             });
             
-            document.getElementById('nextBtn').addEventListener('click', () => {
+            document.getElementById('nextBtn').addEventListener('click', (e) => {
+                e.preventDefault();
                 const selected = document.querySelector('.quantity-btn.selected');
                 if (!selected) { showError('Выберите количество'); return; }
                 if (selected.innerText === 'Другое') {
@@ -282,7 +281,8 @@
             dynamicContent.innerHTML = `<input type="${step.type}" id="textInput" class="input-field" placeholder="${step.placeholder || ''}" value="${current}"><button class="btn-next" id="nextBtn">Далее →</button>`;
             
             const input = document.getElementById('textInput');
-            document.getElementById('nextBtn').addEventListener('click', () => {
+            document.getElementById('nextBtn').addEventListener('click', (e) => {
+                e.preventDefault();
                 let val = input.value.trim();
                 if (step.id === 'phone' && val.length < 5) { showError('Введите телефон'); return; }
                 if (step.id === 'size' && val.length < 3) { showError('Введите размер'); return; }
@@ -317,7 +317,6 @@
             }
         }
 
-        // Формируем данные для отправки
         const templateParams = {
             type: answers.type,
             season: answers.season || 'не указан',
@@ -329,21 +328,18 @@
             message: `Тип: ${answers.type}\nСезон: ${answers.season || 'не указан'}\nРазмер: ${answers.size}\nБренд: ${answers.brand}\nКоличество: ${answers.quantity}\nГород: ${answers.city}\nТелефон: ${answers.phone}`
         };
 
-        // Отправка через EmailJS
         let sent = false;
         try {
             const response = await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
-            if (response.status === 200) {
-                sent = true;
-            }
+            if (response.status === 200) sent = true;
         } catch(error) {
             console.log('Ошибка EmailJS:', error);
         }
 
         dynamicContent.innerHTML = `
             <div class="success-box">
-                ✅ ${sent ? 'Заявка отправлена!' : 'Заявка сохранена! Мы свяжемся с вами'}<br>
-                <strong style="display:block; margin-top:12px;">Менеджер свяжется с вами в ближайшее время</strong>
+                ✅ ${sent ? 'Заявка отправлена!' : 'Заявка сохранена!'}<br>
+                <strong style="display:block; margin-top:12px;">Мы свяжемся с вами</strong>
             </div>
             <button class="reset-btn" id="internalReset">➕ Новая заявка</button>
         `;
@@ -351,7 +347,6 @@
         stepLabel.innerText = 'Готово';
         progressFill.style.width = '100%';
         footerNote.innerText = 'Менеджер свяжется с вами';
-        
         document.getElementById('internalReset')?.addEventListener('click', resetForm);
         resetBtn.style.display = 'block';
         resetBtn.innerText = '➕ Новая заявка';
