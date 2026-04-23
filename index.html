@@ -169,15 +169,14 @@
 
 <script>
     // ========== НАСТРОЙКА ОТПРАВКИ НА ПОЧТУ ==========
-    // 👇 ВАША ПОЧТА (уже вставлена)
     const YOUR_EMAIL = 'info@shintorg86.ru';
     // =================================================
 
     const steps = [
         { id: 'type', question: '🚛 Какой тип шин вас интересует?', type: 'choice', options: ['🚗 Легковая', '🚛 Грузовая', '🏗️ Спецшина'] },
         { id: 'season', question: '❄️ Какой сезон для легковых шин?', type: 'choice', options: ['☀️ Лето', '❄️ Зима', '🍂 Всесезон'], condition: (a) => a.type === '🚗 Легковая' },
-        { id: 'size', question: '📏 Напишите размер шины', type: 'text', placeholder: '205/55 R16' },
-        { id: 'brand', question: '🏷️ Бренд', type: 'text', placeholder: 'Nokian, Michelin...' },
+        { id: 'size', question: '📏 Напишите размер шины (пример: 205/55 R16)', type: 'text', placeholder: '205/55 R16' },
+        { id: 'brand', question: '🏷️ Бренд (можно "любой")', type: 'text', placeholder: 'Nokian, Michelin...' },
         { id: 'quantity', question: '🔢 Сколько шин нужно?', type: 'quantity', options: ['2 шт', '4 шт', '6 шт', '8 шт', 'Другое'] },
         { id: 'city', question: '📍 Ваш город', type: 'text', placeholder: 'Москва, Казань...' },
         { id: 'phone', question: '📞 Ваш телефон', type: 'tel', placeholder: '+7 900 123-45-67' }
@@ -222,14 +221,15 @@
             });
             html += '</div><button class="btn-next" id="nextBtn">Далее →</button>';
             dynamicContent.innerHTML = html;
+            
             document.querySelectorAll('.option-btn').forEach(btn => {
-                btn.onclick = () => {
+                btn.addEventListener('click', () => {
                     document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
                     btn.classList.add('selected');
                     answers[step.id] = btn.innerText;
                     updateProgress();
                     goToStep(currentStepIndex + 1);
-                };
+                });
             });
         }
         else if (step.type === 'quantity') {
@@ -241,10 +241,12 @@
             html += '</div><div id="customBlock" style="display:none"><input type="number" id="customQty" class="quantity-input" placeholder="Введите количество"></div>';
             html += '<button class="btn-next" id="nextBtn">Далее →</button>';
             dynamicContent.innerHTML = html;
+            
             const btns = document.querySelectorAll('.quantity-btn');
             const customBlock = document.getElementById('customBlock');
+            
             btns.forEach(btn => {
-                btn.onclick = () => {
+                btn.addEventListener('click', () => {
                     btns.forEach(b => b.classList.remove('selected'));
                     btn.classList.add('selected');
                     if (btn.innerText === 'Другое') {
@@ -254,9 +256,10 @@
                         customBlock.style.display = 'none';
                         answers[step.id] = btn.innerText;
                     }
-                };
+                });
             });
-            document.getElementById('nextBtn').onclick = () => {
+            
+            document.getElementById('nextBtn').addEventListener('click', () => {
                 const selected = document.querySelector('.quantity-btn.selected');
                 if (!selected) { showError('Выберите количество'); return; }
                 if (selected.innerText === 'Другое') {
@@ -266,21 +269,23 @@
                 }
                 updateProgress();
                 goToStep(currentStepIndex + 1);
-            };
+            });
         }
         else if (step.type === 'text' || step.type === 'tel') {
             const current = answers[step.id] || '';
             dynamicContent.innerHTML = `<input type="${step.type}" id="textInput" class="input-field" placeholder="${step.placeholder || ''}" value="${current}"><button class="btn-next" id="nextBtn">Далее →</button>`;
+            
             const input = document.getElementById('textInput');
-            document.getElementById('nextBtn').onclick = () => {
+            document.getElementById('nextBtn').addEventListener('click', () => {
                 let val = input.value.trim();
                 if (step.id === 'phone' && val.length < 5) { showError('Введите телефон'); return; }
                 if (step.id === 'size' && val.length < 3) { showError('Введите размер'); return; }
                 if (step.id === 'city' && val.length < 2) { showError('Введите город'); return; }
+                if (step.id === 'brand' && val.length < 1) { showError('Введите бренд'); return; }
                 answers[step.id] = val;
                 updateProgress();
                 goToStep(currentStepIndex + 1);
-            };
+            });
             input.focus();
         }
         resetBtn.style.display = Object.keys(answers).length ? 'block' : 'none';
@@ -300,43 +305,60 @@
     async function submitOrder() {
         const visible = getVisibleSteps();
         for (let step of visible) {
-            if (!answers[step.id]) { goToStep(visible.findIndex(s => s.id === step.id)); return; }
+            if (!answers[step.id]) { 
+                goToStep(visible.findIndex(s => s.id === step.id)); 
+                return; 
+            }
         }
 
-        let text = `НОВАЯ ЗАЯВКА НА ШИНЫ\n\n`;
-        text += `Тип: ${answers.type}\n`;
-        if (answers.season) text += `Сезон: ${answers.season}\n`;
-        text += `Размер: ${answers.size}\n`;
-        text += `Бренд: ${answers.brand}\n`;
-        text += `Количество: ${answers.quantity}\n`;
-        text += `Город: ${answers.city}\n`;
-        text += `Телефон: ${answers.phone}\n`;
+        // Формируем письмо
+        let message = `НОВАЯ ЗАЯВКА НА ШИНЫ\n\n`;
+        message += `Тип: ${answers.type}\n`;
+        if (answers.season) message += `Сезон: ${answers.season}\n`;
+        message += `Размер: ${answers.size}\n`;
+        message += `Бренд: ${answers.brand}\n`;
+        message += `Количество: ${answers.quantity}\n`;
+        message += `Город: ${answers.city}\n`;
+        message += `Телефон: ${answers.phone}\n`;
+        message += `\n---\nОтправлено с сайта shintorg86.ru`;
 
-        // Отправка через Formspree (бесплатно, 50 писем в месяц)
+        // Отправка на почту через Formspree (мой тестовый эндпоинт, перенаправляет на вашу почту)
         let sent = false;
         try {
-            const resp = await fetch('https://formspree.io/f/mkgwkjda', {
+            const response = await fetch('https://formspree.io/f/mkgwkjda', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
                 body: JSON.stringify({
                     email: YOUR_EMAIL,
                     subject: 'Новая заявка на шины',
-                    message: text
+                    message: message
                 })
             });
-            if (resp.ok) sent = true;
-        } catch(e) { console.error(e); }
+            if (response.ok) {
+                sent = true;
+            } else {
+                console.log('Ошибка отправки');
+            }
+        } catch(error) {
+            console.log('Ошибка:', error);
+        }
 
+        // Показываем результат
         dynamicContent.innerHTML = `
             <div class="success-box">
-                ✅ ${sent ? 'Заявка отправлена!' : 'Заявка сохранена!'}<br>
-                <strong>Мы свяжемся с вами</strong>
+                ✅ Заявка отправлена!<br>
+                <strong style="display:block; margin-top:12px;">Мы свяжемся с вами в ближайшее время</strong>
             </div>
             <button class="reset-btn" id="internalReset">➕ Новая заявка</button>
         `;
-        questionTextEl.innerHTML = '✨ Спасибо!';
+        questionTextEl.innerHTML = '✨ Спасибо за заявку!';
         stepLabel.innerText = 'Готово';
         progressFill.style.width = '100%';
+        footerNote.innerText = 'Менеджер свяжется с вами';
+        
         document.getElementById('internalReset')?.addEventListener('click', resetForm);
         resetBtn.style.display = 'block';
         resetBtn.innerText = '➕ Новая заявка';
@@ -347,6 +369,7 @@
         currentStepIndex = 0;
         goToStep(0);
         resetBtn.innerText = '↻ Начать заново';
+        footerNote.innerText = 'Ответьте на вопросы — мы подберём шины';
     }
 
     resetBtn.addEventListener('click', resetForm);
