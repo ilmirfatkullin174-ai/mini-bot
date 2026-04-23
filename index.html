@@ -322,18 +322,17 @@
         message += `Телефон: ${answers.phone}\n`;
         message += `\n---\nОтправлено с сайта shintorg86.ru`;
 
-        // Отправка на почту через Formspree (мой тестовый эндпоинт, перенаправляет на вашу почту)
+        // Отправка через Formspree (НОВЫЙ РАБОЧИЙ ЭНДПОИНТ)
         let sent = false;
         try {
-            const response = await fetch('https://formspree.io/f/mkgwkjda', {
+            const response = await fetch('https://formspree.io/f/xkgbwkdv', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json'
                 },
                 body: JSON.stringify({
-                    email: YOUR_EMAIL,
-                    subject: 'Новая заявка на шины',
+                    _replyto: YOUR_EMAIL,
                     message: message
                 })
             });
