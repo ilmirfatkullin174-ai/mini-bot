@@ -3,418 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Шинторг - подбор шин</title>
+    <title>Шинторг - заявка</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
         body {
-            background: linear-gradient(135deg, #0f2b3d 0%, #1a3a4f 100%);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-            padding: 16px;
+            background: #0f2b3d;
+            font-family: system-ui;
+            padding: 20px;
         }
         .card {
-            max-width: 500px;
-            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
             background: white;
-            border-radius: 48px;
-            padding: 32px 24px 40px;
-            box-shadow: 0 25px 45px rgba(0,0,0,0.25);
-        }
-        .progress {
-            background: #e9ecef;
             border-radius: 30px;
-            height: 6px;
-            margin-bottom: 28px;
-            overflow: hidden;
+            padding: 25px;
         }
-        .progress-fill {
-            background: #ff8c00;
-            width: 0%;
-            height: 100%;
-            transition: width 0.3s;
-        }
-        .step-indicator {
-            font-size: 13px;
-            color: #ff8c00;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-        h2 {
-            font-size: 1.7rem;
-            margin-bottom: 24px;
+        h1 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
             color: #1e2a3a;
         }
-        .options {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 28px;
-        }
-        .option-btn {
-            background: #f1f3f5;
-            border: none;
-            padding: 16px 20px;
-            border-radius: 60px;
-            font-size: 1.05rem;
-            text-align: left;
-            cursor: pointer;
-            transition: 0.2s;
-            font-weight: 500;
+        input, select {
             width: 100%;
+            padding: 14px;
+            margin-bottom: 15px;
+            border-radius: 50px;
+            border: 1px solid #ccc;
+            font-size: 16px;
         }
-        .option-btn.selected {
+        button {
+            width: 100%;
+            padding: 14px;
             background: #ff8c00;
             color: white;
-        }
-        .input-field {
-            width: 100%;
-            padding: 16px 20px;
-            font-size: 1rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 60px;
-            outline: none;
-            margin-bottom: 28px;
-        }
-        .input-field:focus {
-            border-color: #ff8c00;
-        }
-        .btn-next {
-            background: #1e2a3a;
-            color: white;
             border: none;
-            width: 100%;
-            padding: 16px;
-            font-size: 1.1rem;
+            border-radius: 50px;
+            font-size: 18px;
             font-weight: bold;
-            border-radius: 60px;
             cursor: pointer;
-            margin-top: 10px;
         }
-        .btn-next:active {
-            background: #ff8c00;
-            transform: scale(0.98);
-        }
-        .success-box {
+        .success {
             background: #d1fae5;
             color: #065f46;
-            padding: 20px;
-            border-radius: 32px;
+            padding: 15px;
+            border-radius: 20px;
             text-align: center;
-            margin-top: 16px;
-        }
-        .error-msg {
-            color: #dc2626;
-            font-size: 14px;
-            margin-bottom: 16px;
-            text-align: center;
-        }
-        .reset-btn {
-            background: none;
-            border: 1px solid #cbd5e1;
-            color: #475569;
-            padding: 10px;
-            border-radius: 40px;
-            margin-top: 20px;
-            width: 100%;
-            cursor: pointer;
-        }
-        .footer-note {
-            font-size: 11px;
-            color: #94a3b8;
-            text-align: center;
-            margin-top: 20px;
-        }
-        .quantity-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-bottom: 28px;
-        }
-        .quantity-btn {
-            background: #f1f3f5;
-            border: none;
-            padding: 14px 20px;
-            border-radius: 50px;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            flex: 1 0 auto;
-        }
-        .quantity-btn.selected {
-            background: #ff8c00;
-            color: white;
-        }
-        .quantity-input {
-            width: 100%;
-            padding: 14px 20px;
-            font-size: 1rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 50px;
-            text-align: center;
-        }
-        @media (max-width: 480px) {
-            .card { padding: 24px 20px 32px; }
-            h2 { font-size: 1.4rem; }
-            .option-btn, .quantity-btn, .btn-next { padding: 14px 16px; }
+            margin-top: 15px;
         }
     </style>
 </head>
 <body>
-<div class="card" id="app">
-    <div class="progress"><div class="progress-fill" id="progressFill"></div></div>
-    <div class="step-indicator" id="stepLabel">Вопрос 1 из 7</div>
-    <h2 id="questionText">Загрузка...</h2>
-    <div id="dynamicContent"></div>
-    <button class="reset-btn" id="resetBtn" style="display: none;">↻ Начать заново</button>
-    <div class="footer-note" id="footerNote">Ответьте на вопросы — мы подберём шины</div>
+<div class="card">
+    <h1>🚛 Заявка на шины</h1>
+
+    <select id="type">
+        <option value="">Тип шин</option>
+        <option>🚗 Легковая</option>
+        <option>🚛 Грузовая</option>
+        <option>🏗️ Спецшина</option>
+    </select>
+
+    <select id="season">
+        <option value="">Сезон (для легковых)</option>
+        <option>☀️ Лето</option>
+        <option>❄️ Зима</option>
+        <option>🍂 Всесезон</option>
+    </select>
+
+    <input type="text" id="size" placeholder="Размер (205/55 R16)">
+    <input type="text" id="brand" placeholder="Бренд">
+    <input type="text" id="city" placeholder="Город">
+    <input type="tel" id="phone" placeholder="Телефон">
+
+    <button id="sendBtn">📩 Отправить заявку</button>
+    <div id="result"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>
-    // ========== EmailJS НАСТРОЙКИ (ВАШИ) ==========
-    const EMAILJS_PUBLIC_KEY = 'tAKHA2aayPczXoZdt';
-    const EMAILJS_SERVICE_ID = 'service_8cmb02c';
-    const EMAILJS_TEMPLATE_ID = 'template_vy8p6wi';
-    emailjs.init(EMAILJS_PUBLIC_KEY);
+    const PUBLIC_KEY = 'tAKHA2aayPczXoZdt';
+    const SERVICE_ID = 'service_8cmb02c';
+    const TEMPLATE_ID = 'template_vy8p6wi';
 
-    // ========== ВСЕ ВОПРОСЫ ==========
-    const steps = [
-        { id: 'type', text: '🚛 Какой тип шин вас интересует?', type: 'choice', options: ['🚗 Легковая', '🚛 Грузовая', '🏗️ Спецшина'] },
-        { id: 'season', text: '❄️ Какой сезон для шин? (для легковых)', type: 'choice', options: ['☀️ Лето', '❄️ Зима', '🍂 Всесезон'] },
-        { id: 'size', text: '📏 Напишите размер шины', type: 'text', placeholder: '205/55 R16' },
-        { id: 'brand', text: '🏷️ Бренд (можно "любой")', type: 'text', placeholder: 'Nokian, Michelin...' },
-        { id: 'quantity', text: '🔢 Сколько шин нужно?', type: 'quantity', options: ['2 шт', '4 шт', '6 шт', '8 шт', 'Другое'] },
-        { id: 'city', text: '📍 Ваш город', type: 'text', placeholder: 'Москва, Казань...' },
-        { id: 'phone', text: '📞 Ваш телефон', type: 'tel', placeholder: '+7 900 123-45-67' }
-    ];
+    emailjs.init(PUBLIC_KEY);
 
-    let currentStepIndex = 0;
-    let answers = {};
+    document.getElementById('sendBtn').onclick = function() {
+        const type = document.getElementById('type').value;
+        const season = document.getElementById('season').value;
+        const size = document.getElementById('size').value;
+        const brand = document.getElementById('brand').value;
+        const city = document.getElementById('city').value;
+        const phone = document.getElementById('phone').value;
 
-    // DOM элементы
-    const questionEl = document.getElementById('questionText');
-    const contentEl = document.getElementById('dynamicContent');
-    const stepLabel = document.getElementById('stepLabel');
-    const progressFill = document.getElementById('progressFill');
-    const resetBtn = document.getElementById('resetBtn');
-
-    // Обновление прогресса
-    function updateProgress() {
-        const answeredCount = Object.keys(answers).length;
-        const percent = (answeredCount / steps.length) * 100;
-        progressFill.style.width = percent + '%';
-        stepLabel.innerText = `Вопрос ${currentStepIndex + 1} из ${steps.length}`;
-    }
-
-    // Показать ошибку
-    function showError(msg) {
-        let err = document.querySelector('.error-msg');
-        if (!err) {
-            err = document.createElement('div');
-            err.className = 'error-msg';
-            contentEl.appendChild(err);
-        }
-        err.innerText = msg;
-        setTimeout(() => { if (err) err.innerText = ''; }, 2000);
-    }
-
-    // Переход к следующему шагу
-    function nextStep() {
-        currentStepIndex++;
-        renderStep();
-    }
-
-    // Отрисовка текущего шага
-    function renderStep() {
-        if (currentStepIndex >= steps.length) {
-            submitForm();
+        if (!type || !size || !brand || !city || !phone) {
+            document.getElementById('result').innerHTML = '<div class="success" style="background:#ffe0e0;color:#c00;">❌ Заполните все поля</div>';
             return;
         }
 
-        const step = steps[currentStepIndex];
-        questionEl.innerHTML = step.text;
-        updateProgress();
+        const message = `Тип: ${type}\nСезон: ${season || 'не указан'}\nРазмер: ${size}\nБренд: ${brand}\nГород: ${city}\nТелефон: ${phone}`;
 
-        if (step.type === 'choice') {
-            let html = '<div class="options">';
-            for (let opt of step.options) {
-                const isSelected = (answers[step.id] === opt);
-                html += `<button class="option-btn ${isSelected ? 'selected' : ''}" data-value="${opt}">${opt}</button>`;
-            }
-            html += '</div><button class="btn-next" id="nextBtn">Далее →</button>';
-            contentEl.innerHTML = html;
-
-            // Вешаем обработчики на кнопки выбора
-            const btns = document.querySelectorAll('.option-btn');
-            for (let btn of btns) {
-                btn.onclick = function() {
-                    // Убираем выделение
-                    for (let b of btns) b.classList.remove('selected');
-                    this.classList.add('selected');
-                    answers[step.id] = this.getAttribute('data-value');
-                    // Автоматически переходим дальше
-                    nextStep();
-                };
-            }
-        }
-        else if (step.type === 'quantity') {
-            let html = '<div class="quantity-buttons">';
-            for (let opt of step.options) {
-                const isSelected = (answers[step.id] === opt);
-                html += `<button class="quantity-btn ${isSelected ? 'selected' : ''}" data-value="${opt}">${opt}</button>`;
-            }
-            html += '</div><div id="customBlock" style="display:none"><input type="number" id="customQty" class="quantity-input" placeholder="Введите количество"></div>';
-            html += '<button class="btn-next" id="nextBtn">Далее →</button>';
-            contentEl.innerHTML = html;
-
-            const btns = document.querySelectorAll('.quantity-btn');
-            const customBlock = document.getElementById('customBlock');
-            let selectedValue = answers[step.id] || null;
-
-            for (let btn of btns) {
-                btn.onclick = function() {
-                    for (let b of btns) b.classList.remove('selected');
-                    this.classList.add('selected');
-                    const val = this.getAttribute('data-value');
-                    if (val === 'Другое') {
-                        customBlock.style.display = 'block';
-                        selectedValue = null;
-                    } else {
-                        customBlock.style.display = 'none';
-                        selectedValue = val;
-                        answers[step.id] = val;
-                    }
-                };
-            }
-
-            const nextBtn = document.getElementById('nextBtn');
-            nextBtn.onclick = function() {
-                const selected = document.querySelector('.quantity-btn.selected');
-                if (!selected) {
-                    showError('Выберите количество шин');
-                    return;
-                }
-                if (selected.getAttribute('data-value') === 'Другое') {
-                    const customVal = document.getElementById('customQty').value;
-                    if (!customVal || customVal < 1) {
-                        showError('Введите количество шин');
-                        return;
-                    }
-                    answers[step.id] = customVal + ' шт';
-                }
-                nextStep();
-            };
-        }
-        else if (step.type === 'text' || step.type === 'tel') {
-            const currentVal = answers[step.id] || '';
-            const inputType = step.type === 'tel' ? 'tel' : 'text';
-            contentEl.innerHTML = `<input type="${inputType}" id="textInput" class="input-field" placeholder="${step.placeholder || ''}" value="${currentVal}"><button class="btn-next" id="nextBtn">Далее →</button>`;
-
-            const input = document.getElementById('textInput');
-            const nextBtn = document.getElementById('nextBtn');
-
-            nextBtn.onclick = function() {
-                let val = input.value.trim();
-                if (step.id === 'phone' && val.length < 5) {
-                    showError('Введите корректный номер телефона');
-                    return;
-                }
-                if (step.id === 'size' && val.length < 3) {
-                    showError('Введите размер шины');
-                    return;
-                }
-                if (step.id === 'city' && val.length < 2) {
-                    showError('Введите ваш город');
-                    return;
-                }
-                if (step.id === 'brand' && val.length < 1) {
-                    showError('Введите бренд или "любой"');
-                    return;
-                }
-                answers[step.id] = val;
-                nextStep();
-            };
-            input.focus();
-        }
-
-        resetBtn.style.display = Object.keys(answers).length ? 'block' : 'none';
-    }
-
-    // Отправка заявки
-    async function submitForm() {
-        // Проверяем, что все вопросы отмечены
-        for (let step of steps) {
-            if (!answers[step.id]) {
-                showError(`Ответьте на вопрос: ${step.text}`);
-                currentStepIndex = steps.findIndex(s => s.id === step.id);
-                renderStep();
-                return;
-            }
-        }
-
-        const message = `НОВАЯ ЗАЯВКА НА ШИНЫ\n\nТип: ${answers.type || ''}\nСезон: ${answers.season || ''}\nРазмер: ${answers.size || ''}\nБренд: ${answers.brand || ''}\nКоличество: ${answers.quantity || ''}\nГород: ${answers.city || ''}\nТелефон: ${answers.phone || ''}`;
-
-        let sent = false;
-        try {
-            const response = await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-                type: answers.type || '',
-                season: answers.season || '',
-                size: answers.size || '',
-                brand: answers.brand || '',
-                quantity: answers.quantity || '',
-                city: answers.city || '',
-                phone: answers.phone || '',
-                message: message
-            });
-            if (response.status === 200) sent = true;
-        } catch(e) {
-            console.log('Ошибка отправки:', e);
-        }
-
-        contentEl.innerHTML = `
-            <div class="success-box">
-                ✅ ${sent ? 'Заявка отправлена!' : 'Заявка получена!'}<br>
-                <strong>Мы свяжемся с вами в ближайшее время</strong>
-            </div>
-            <button class="reset-btn" id="internalReset">➕ Новая заявка</button>
-        `;
-        questionEl.innerHTML = '✨ Спасибо за заявку!';
-        stepLabel.innerText = 'Готово';
-        progressFill.style.width = '100%';
-        document.getElementById('footerNote').innerText = 'Менеджер свяжется с вами';
-
-        const internalReset = document.getElementById('internalReset');
-        if (internalReset) {
-            internalReset.onclick = function() {
-                resetForm();
-            };
-        }
-        resetBtn.style.display = 'block';
-        resetBtn.innerText = '➕ Новая заявка';
-    }
-
-    // Сброс формы
-    function resetForm() {
-        answers = {};
-        currentStepIndex = 0;
-        renderStep();
-        resetBtn.innerText = '↻ Начать заново';
-        document.getElementById('footerNote').innerText = 'Ответьте на вопросы — мы подберём шины';
-    }
-
-    resetBtn.onclick = function() {
-        resetForm();
+        emailjs.send(SERVICE_ID, TEMPLATE_ID, {
+            type: type,
+            season: season || 'не указан',
+            size: size,
+            brand: brand,
+            city: city,
+            phone: phone,
+            message: message
+        }).then(function() {
+            document.getElementById('result').innerHTML = '<div class="success">✅ Заявка отправлена!</div>';
+            document.getElementById('type').value = '';
+            document.getElementById('season').value = '';
+            document.getElementById('size').value = '';
+            document.getElementById('brand').value = '';
+            document.getElementById('city').value = '';
+            document.getElementById('phone').value = '';
+        }).catch(function(error) {
+            document.getElementById('result').innerHTML = '<div class="success" style="background:#ffe0e0;color:#c00;">❌ Ошибка: ' + error.text + '</div>';
+        });
     };
-
-    // Запуск
-    renderStep();
 </script>
 </body>
 </html>
