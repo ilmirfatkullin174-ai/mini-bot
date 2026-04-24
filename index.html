@@ -168,7 +168,6 @@
 
 <script>
     // ----- ЭТАПЫ ОПРОСНИКА (пошагово) -----
-    // Каждый шаг: question, type, options (для выбора), next
     const steps = [
         { 
             id: 'type', 
@@ -181,7 +180,7 @@
             question: '❄️ Какой сезон для легковых шин?', 
             type: 'choice',
             options: ['☀️ Лето', '❄️ Зима', '🍂 Всесезон'],
-            condition: (answers) => answers.type === '🚗 Легковая'   // появляется только если легковая
+            condition: (answers) => answers.type === '🚗 Легковая'
         },
         { 
             id: 'size', 
@@ -203,16 +202,15 @@
         }
     ];
 
-    // ----- НАСТРОЙКИ ОТПРАВКИ (ЗАМЕНИТЕ НА ВАШИ ДАННЫЕ) -----
-    const BOT_TOKEN = 'ВАШ_ТОКЕН_БОТА_ОТ_BOTFATHER';   // вставьте токен от @BotFather
-    const CHAT_ID   = 'ВАШ_TELEGRAM_ID';               // ваш ID (узнать у @userinfobot)
+    // ========== ВАШ TELEGRAM БОТ ==========
+    const BOT_TOKEN = '8171108689:AAH6Yt6RMo9zZ8qYMP3kh_7lWZ7yEgK3FqI';
+    const CHAT_ID = '963751517';
+    // ======================================
 
-    // ----- СОСТОЯНИЕ -----
-    let currentStepIndex = 0;          // индекс текущего шага (с учётом условий)
-    let answers = {};                  // { type: 'Легковая', season: 'Зима', ... }
+    let currentStepIndex = 0;
+    let answers = {};
     let submitted = false;
 
-    // DOM элементы
     const questionTextEl = document.getElementById('questionText');
     const dynamicContent = document.getElementById('dynamicContent');
     const stepLabel = document.getElementById('stepLabel');
@@ -220,9 +218,7 @@
     const resetBtn = document.getElementById('resetBtn');
     const footerNote = document.getElementById('footerNote');
 
-    // ----- ФУНКЦИИ -----
     function getVisibleSteps() {
-        // возвращает массив шагов, которые нужно показать (с учётом condition)
         return steps.filter(step => {
             if (step.condition) {
                 return step.condition(answers);
@@ -241,7 +237,6 @@
     function goToStep(stepIndex) {
         const visible = getVisibleSteps();
         if (stepIndex >= visible.length) {
-            // Опрос завершён → отправляем заявку
             submitOrder();
             return;
         }
@@ -249,11 +244,9 @@
         const step = visible[stepIndex];
         currentStepIndex = stepIndex;
         
-        // Обновляем заголовок и номер вопроса
         stepLabel.innerText = `Вопрос ${stepIndex+1} из ${visible.length}`;
         questionTextEl.innerHTML = step.question;
         
-        // Отрисовываем контент в зависимости от типа вопроса
         if (step.type === 'choice') {
             let optionsHtml = '<div class="options">';
             step.options.forEach(opt => {
@@ -264,20 +257,15 @@
             optionsHtml += '</div><button class="btn-next" id="nextBtn">Далее →</button>';
             dynamicContent.innerHTML = optionsHtml;
             
-            // Вешаем обработчики на кнопки-варианты
             const btns = document.querySelectorAll('.option-btn');
             btns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    // Убираем выделение у всех
+                btn.onclick = () => {
                     btns.forEach(b => b.classList.remove('selected'));
                     btn.classList.add('selected');
-                    // Сохраняем ответ (полный текст с эмодзи)
-                    const fullText = btn.innerText;
-                    answers[step.id] = fullText;
+                    answers[step.id] = btn.innerText;
                     updateProgress();
-                    // Автоматически переходим дальше
                     goToStep(currentStepIndex + 1);
-                });
+                };
             });
         } 
         else if (step.type === 'text' || step.type === 'tel') {
@@ -293,7 +281,6 @@
             const handleNext = () => {
                 let val = input.value.trim();
                 if (step.id === 'phone') {
-                    // минимальная проверка телефона
                     if (val.length < 5) {
                         showError('Введите корректный номер телефона');
                         return;
@@ -314,12 +301,11 @@
                 goToStep(currentStepIndex + 1);
             };
             
-            nextBtn.addEventListener('click', handleNext);
-            input.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleNext(); });
+            nextBtn.onclick = handleNext;
+            input.onkeypress = (e) => { if (e.key === 'Enter') handleNext(); };
             input.focus();
         }
         
-        // Обновляем прогресс и показываем кнопку сброса, если есть ответы
         updateProgress();
         resetBtn.style.display = Object.keys(answers).length > 0 ? 'block' : 'none';
         footerNote.innerText = (step.type === 'choice') ? 'Нажмите на вариант ответа' : 'Введите ответ и нажмите "Далее"';
@@ -338,17 +324,14 @@
     
     async function submitOrder() {
         const visible = getVisibleSteps();
-        // проверяем, что все шаги заполнены
         for (let step of visible) {
             if (!answers[step.id]) {
-                // не должно случиться, но на всякий случай
                 goToStep(visible.findIndex(s => s.id === step.id));
                 return;
             }
         }
         
-        // Формируем читаемое сообщение
-        let message = `🔔 НОВАЯ ЗАЯВКА НА ШИНЫ (опросник) 🔔\n\n`;
+        let message = `🔔 НОВАЯ ЗАЯВКА НА ШИНЫ 🔔\n\n`;
         message += `🚛 Тип: ${answers.type}\n`;
         if (answers.type === '🚗 Легковая' && answers.season) {
             message += `❄️ Сезон: ${answers.season}\n`;
@@ -356,31 +339,23 @@
         message += `📏 Размер: ${answers.size}\n`;
         message += `🏷️ Бренд: ${answers.brand}\n`;
         message += `📞 Телефон: ${answers.phone}\n`;
-        message += `\n🕒 Отправлено с мини-приложения Max`;
+        message += `\n🕒 Отправлено с мини-приложения`;
         
-        // Отправка в Telegram
-        let tgSuccess = false;
-        if (BOT_TOKEN !== 'ВАШ_ТОКЕН_БОТА_ОТ_BOTFATHER' && CHAT_ID !== 'ВАШ_TELEGRAM_ID') {
-            try {
-                const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-                const resp = await fetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ chat_id: CHAT_ID, text: message })
-                });
-                const data = await resp.json();
-                if (data.ok) tgSuccess = true;
-                else console.warn('Telegram API error', data);
-            } catch(e) { console.error(e); }
-        } else {
-            console.warn('Токен или ID не настроены. Заявка в логе:');
-            console.log(message);
-        }
+        let sent = false;
+        try {
+            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+            const resp = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: CHAT_ID, text: message })
+            });
+            const data = await resp.json();
+            if (data.ok) sent = true;
+        } catch(e) { console.error(e); }
         
-        // Показываем финальный экран
         const successHtml = `
             <div class="success-box">
-                ${tgSuccess ? '✅ Заявка отправлена!' : '✅ Заявка получена (демо-режим)'}<br>
+                ✅ ${sent ? 'Заявка отправлена!' : 'Заявка получена!'}<br>
                 <strong style="display:block; margin-top:12px;">Мы свяжемся с вами в ближайшее время</strong>
             </div>
             <button class="reset-btn" id="internalReset">➕ Новая заявка</button>
@@ -392,7 +367,7 @@
         footerNote.innerText = 'Менеджер свяжется с вами';
         
         const resetNew = document.getElementById('internalReset');
-        if (resetNew) resetNew.addEventListener('click', () => resetForm());
+        if (resetNew) resetNew.onclick = () => resetForm();
         resetBtn.style.display = 'block';
         resetBtn.innerText = '➕ Новая заявка';
         submitted = true;
@@ -408,8 +383,7 @@
         goToStep(0);
     }
     
-    // Инициализация
-    resetBtn.addEventListener('click', resetForm);
+    resetBtn.onclick = () => resetForm();
     goToStep(0);
 </script>
 </body>
